@@ -160,11 +160,10 @@ export const ShopListingPage: React.FC<{
     ? categories.filter((c) => c.storeScope === scope)
     : categories;
 
-  const heading = saleOnly
-    ? 'Offers & Discounted Products'
-    : scope === '3d_printed'
-    ? 'Ready-Made 3D Printed Products Store'
-    : 'Engineering & Electronics Online Store';
+  const heading =
+    scope === '3d_printed'
+      ? 'Ready-Made 3D Printed Products Store'
+      : 'Engineering & Electronics Online Store';
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 space-y-8">
@@ -182,7 +181,7 @@ export const ShopListingPage: React.FC<{
           <button
             onClick={() => navigate('/shop')}
             className={`px-3 py-1.5 text-xs font-medium rounded-lg border whitespace-nowrap ${
-              !scope && !saleOnly ? 'bg-[#0B1B3B] text-white border-[#0B1B3B]' : 'bg-white text-slate-700 border-slate-300'
+              !scope ? 'bg-[#0B1B3B] text-white border-[#0B1B3B]' : 'bg-white text-slate-700 border-slate-300'
             }`}
           >
             All Hardware
@@ -194,14 +193,6 @@ export const ShopListingPage: React.FC<{
             }`}
           >
             3D Printed Store
-          </button>
-          <button
-            onClick={() => navigate('/sale')}
-            className={`px-3 py-1.5 text-xs font-medium rounded-lg border whitespace-nowrap ${
-              saleOnly ? 'bg-[#0B1B3B] text-white border-[#0B1B3B]' : 'bg-white text-slate-700 border-slate-300'
-            }`}
-          >
-            Offers / Sale
           </button>
         </div>
       </div>

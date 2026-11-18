@@ -27,9 +27,23 @@ export const DEFAULT_HOMEPAGE_SECTIONS = [
       'Official e-commerce store of NexusTekFusion Private Limited. Buy agricultural & FPV drone components, embedded electronics, custom 3D printed assemblies, and KRASHIVANTRI UAV platforms with live Razorpay checkout.',
     primaryCtaLabel: 'Shop All Products',
     primaryCtaLink: '/shop',
-    secondaryCtaLabel: 'Explore Offers & Sale',
-    secondaryCtaLink: '/sale',
+    secondaryCtaLabel: 'Explore Our Drones',
+    secondaryCtaLink: '/krashivantri',
     imageUrl: '/src/assets/images/hero_nexustek_engineering_1794981062404.jpg',
+  },
+  {
+    id: 'agri_fpv_showcase',
+    type: 'agri_fpv_showcase',
+    visible: true,
+    kicker: 'OUR DRONES · KRASHIVANTRI & CUSTOM UAVs',
+    heading: 'Our Drones: KRASHIVANTRI X, X PRO & Custom UAV Platforms',
+    subheading:
+      'Indigenous agricultural spraying drones and custom survey hexacopters engineered in Nagpur with live Farmer & Pilot portals and direct spare-parts support.',
+    primaryCtaLabel: 'Explore All Drones',
+    primaryCtaLink: '/krashivantri',
+    secondaryCtaLabel: 'Shop Drone Hardware',
+    secondaryCtaLink: '/shop/category/agricultural-drones',
+    imageUrl: '/src/assets/images/service_agri_drone_1794981061744.jpg',
   },
   {
     id: 'categories',
@@ -66,20 +80,6 @@ export const DEFAULT_HOMEPAGE_SECTIONS = [
     heading: 'New Arrivals in Store',
     primaryCtaLabel: 'View New Stock',
     primaryCtaLink: '/shop',
-  },
-  {
-    id: 'agri_fpv_showcase',
-    type: 'agri_fpv_showcase',
-    visible: true,
-    kicker: 'KRASHIVANTRI Agricultural Drones',
-    heading: 'KRASHIVANTRI X & KRASHIVANTRI X PRO',
-    subheading:
-      'Dual indigenous agricultural UAV platforms built for field spraying missions, rapid servicing, and integrated Farmer & Pilot digital operations.',
-    primaryCtaLabel: 'Explore KRASHIVANTRI',
-    primaryCtaLink: '/krashivantri',
-    secondaryCtaLabel: 'Enquire Now',
-    secondaryCtaLink: '/krashivantri#enquiry',
-    imageUrl: '/src/assets/images/service_agri_drone_1794981061744.jpg',
   },
   {
     id: 'company_intro',
@@ -174,17 +174,15 @@ export const DEFAULT_NAVIGATION_MENUS = {
         { id: 'shop-iot', label: 'IoT & Embedded Systems', to: '/shop/category/iot-embedded-systems' },
         { id: 'shop-3dp', label: '3D Printers & Materials', to: '/shop/category/3d-printers' },
         { id: 'shop-3dp-store', label: '3D Printed Store', to: '/store/3d-printed-products' },
-        { id: 'shop-sale', label: 'Offers & Sale', to: '/sale' },
       ],
     },
-    { id: 'sale', label: 'Offers', to: '/sale', visible: true, sortOrder: 2 },
-    { id: 'printing', label: '3D Printing', to: '/services/3d-printing', visible: true, sortOrder: 3 },
+    { id: 'printing', label: '3D Printing', to: '/services/3d-printing', visible: true, sortOrder: 2 },
     {
       id: 'krashivantri',
       label: 'KRASHIVANTRI',
       to: '/krashivantri',
       visible: true,
-      sortOrder: 4,
+      sortOrder: 3,
       children: [
         { id: 'krash-overview', label: 'KRASHIVANTRI Drones', to: '/krashivantri' },
         { id: 'krash-x', label: 'KRASHIVANTRI X', to: '/product/krashivantri-x' },
@@ -198,7 +196,7 @@ export const DEFAULT_NAVIGATION_MENUS = {
       label: 'Services',
       to: '/services',
       visible: true,
-      sortOrder: 5,
+      sortOrder: 4,
       children: [
         { id: 'svc-all', label: 'All Engineering Services', to: '/services' },
         { id: 'svc-repair', label: 'Drone Repair & Service', to: '/services/drone-repair' },
@@ -207,7 +205,7 @@ export const DEFAULT_NAVIGATION_MENUS = {
         { id: 'svc-b2b', label: 'B2B Bulk & Institutional', to: '/b2b' },
       ],
     },
-    { id: 'track', label: 'Track Order', to: '/track-order', visible: true, sortOrder: 6 },
+    { id: 'track', label: 'Track Order', to: '/track-order', visible: true, sortOrder: 5 },
   ],
 };
 
@@ -487,6 +485,43 @@ export async function ensureInitialSeed() {
           .update(siteSettings)
           .set({ value: DEFAULT_SERVICES_CATALOG, updatedAt: new Date() })
           .where(eq(siteSettings.key, 'servicesCatalog'));
+      }
+    }
+
+    // Remove legacy /sale / Offers links from persisted navigationMenus and update homepageLayout so Drones showcase appears right after Hero
+    const [existingNav] = await db
+      .select()
+      .from(siteSettings)
+      .where(eq(siteSettings.key, 'navigationMenus'))
+      .limit(1);
+    if (existingNav?.value && JSON.stringify(existingNav.value).includes('/sale')) {
+      await db
+        .update(siteSettings)
+        .set({ value: DEFAULT_NAVIGATION_MENUS, updatedAt: new Date() })
+        .where(eq(siteSettings.key, 'navigationMenus'));
+    }
+
+    const [existingHomeLayout] = await db
+      .select()
+      .from(siteSettings)
+      .where(eq(siteSettings.key, 'homepageLayout'))
+      .limit(1);
+    if (existingHomeLayout?.value) {
+      const rawLayout = JSON.stringify(existingHomeLayout.value);
+      const layoutVal = existingHomeLayout.value as { published?: Array<{ id: string }>; draft?: Array<{ id: string }> };
+      const pubIds = Array.isArray(layoutVal.published) ? layoutVal.published.map((s) => s.id) : [];
+      if (rawLayout.includes('/sale') || pubIds[1] !== 'agri_fpv_showcase') {
+        await db
+          .update(siteSettings)
+          .set({
+            value: {
+              draft: DEFAULT_HOMEPAGE_SECTIONS,
+              published: DEFAULT_HOMEPAGE_SECTIONS,
+              publishedAt: new Date().toISOString(),
+            },
+            updatedAt: new Date(),
+          })
+          .where(eq(siteSettings.key, 'homepageLayout'));
       }
     }
 

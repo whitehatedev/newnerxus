@@ -87,11 +87,11 @@ const SERVICE_CARDS = [
 
 const FALLBACK_SECTIONS: HomepageSectionConfig[] = [
   { id: 'hero', type: 'hero', visible: true },
+  { id: 'agri_fpv_showcase', type: 'agri_fpv_showcase', visible: true },
   { id: 'categories', type: 'categories', visible: true },
   { id: 'featured_products', type: 'featured_products', visible: true },
   { id: 'bestsellers', type: 'bestsellers', visible: true },
   { id: 'new_arrivals', type: 'new_arrivals', visible: true },
-  { id: 'agri_fpv_showcase', type: 'agri_fpv_showcase', visible: true },
   { id: 'company_intro', type: 'company_intro', visible: true },
   { id: 'services', type: 'services', visible: true },
   { id: 'printing_and_projects', type: 'printing_and_projects', visible: true },
@@ -322,10 +322,18 @@ export const HomePage: React.FC = () => {
                       <ArrowRight className="w-4 h-4" />
                     </button>
                     <button
-                      onClick={() => navigate(sec.secondaryCtaLink || '/sale')}
+                      onClick={() =>
+                        navigate(
+                          sec.secondaryCtaLink && sec.secondaryCtaLink !== '/sale'
+                            ? sec.secondaryCtaLink
+                            : '/krashivantri'
+                        )
+                      }
                       className="px-6 py-3 border border-slate-600 hover:border-blue-400 text-slate-100 text-sm font-semibold rounded-lg transition-colors whitespace-nowrap"
                     >
-                      {sec.secondaryCtaLabel || 'View Offers & Sale'}
+                      {sec.secondaryCtaLabel && !sec.secondaryCtaLabel.toLowerCase().includes('offer')
+                        ? sec.secondaryCtaLabel
+                        : 'Explore Our Drones'}
                     </button>
                   </div>
                 </div>
@@ -543,65 +551,137 @@ export const HomePage: React.FC = () => {
           </section>
         );
 
-      case 'agri_fpv_showcase':
+      case 'agri_fpv_showcase': {
+        const allCatalogDrones = Array.from(
+          new Map(
+            [...featuredProducts, ...bestsellerProducts, ...newArrivalProducts]
+              .filter(
+                (p) =>
+                  p.slug !== 'krashivantri-x' &&
+                  p.slug !== 'krashivantri-x-pro' &&
+                  /drone|uav|hexacopter|agri|flight controller|nozzle/i.test(
+                    `${p.name} ${p.subcategory || ''} ${(p.tags || []).join(' ')}`
+                  )
+              )
+              .map((p) => [p.id, p])
+          ).values()
+        ).slice(0, 4);
+
+        const droneModels = krashiCatalog?.models?.length
+          ? krashiCatalog.models
+          : [
+              {
+                id: 'krashivantri-x',
+                name: 'KRASHIVANTRI X',
+                tagline: 'Smart Agriculture. Precision Spraying.',
+                summary:
+                  'Modular multi-rotor agricultural UAV engineered for field spraying missions, rapid servicing, and Farmer & Pilot workflows.',
+                imageUrl: DRONE_IMG,
+              },
+              {
+                id: 'krashivantri-x-pro',
+                name: 'KRASHIVANTRI X PRO',
+                tagline: 'Advanced Intelligence. Precision Agriculture.',
+                summary:
+                  'Commercial-grade agricultural drone platform for fleet contractors, universities, and precision spraying operations.',
+                imageUrl: HERO_IMG,
+              },
+            ];
+
         return (
-          <section key={sec.id} className="max-w-7xl mx-auto px-4 sm:px-6 space-y-6">
-            <div className="rounded-2xl border border-slate-200 bg-[#0B1B3B] text-white overflow-hidden grid grid-cols-1 lg:grid-cols-12 items-stretch">
-              <div className="lg:col-span-6 p-8 sm:p-12 flex flex-col justify-center space-y-5">
-                <div className="text-xs font-mono font-semibold text-blue-300">
-                  {sec.kicker || 'KRASHIVANTRI AGRICULTURAL DRONES'}
+          <section key={sec.id} className="max-w-7xl mx-auto px-4 sm:px-6 space-y-8">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+              <div className="space-y-1.5">
+                <div className="text-xs font-mono font-semibold text-blue-700">
+                  {sec.kicker || 'OUR DRONES · KRASHIVANTRI & CUSTOM UAVs'}
                 </div>
-                <h2 className="font-display text-3xl font-bold text-balance">
-                  {sec.heading || 'KRASHIVANTRI X & KRASHIVANTRI X PRO'}
+                <h2 className="font-display text-3xl font-bold tracking-tight text-[#0B1B3B]">
+                  {sec.heading || 'Our Drones: KRASHIVANTRI X, X PRO & UAV Platforms'}
                 </h2>
-                <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
+                <p className="text-sm text-slate-600 max-w-2xl">
                   {sec.subheading ||
-                    'Flagship precision spraying UAV platforms engineered by NexusTekFusion, paired with connected mobile apps and direct spare parts support.'}
+                    'Explore our flagship agricultural spraying drones, custom mapping hexacopters, and flight-ready UAV kits.'}
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                  {(krashiCatalog?.models || [
-                    { id: 'krashivantri-x', name: 'KRASHIVANTRI X', tagline: 'Smart Agriculture. Precision Spraying.' },
-                    { id: 'krashivantri-x-pro', name: 'KRASHIVANTRI X PRO', tagline: 'Advanced Intelligence. Precision Agriculture.' },
-                  ]).map((m) => (
-                    <button
-                      key={m.id}
-                      onClick={() => navigate(`/product/${m.id}`)}
-                      className="text-left rounded-xl border border-slate-700 bg-slate-900/60 hover:border-blue-400 p-4 transition-colors space-y-1"
-                    >
-                      <div className="font-display font-bold text-sm text-white">{m.name}</div>
-                      <div className="text-xs text-blue-300">{m.tagline}</div>
-                      <div className="text-[11px] font-semibold text-slate-300 pt-1 inline-flex items-center gap-1">
-                        Explore Model <ArrowRight className="w-3 h-3" />
-                      </div>
-                    </button>
-                  ))}
-                </div>
-                <div className="flex flex-wrap gap-3 pt-2">
-                  <button
-                    onClick={() => navigate(sec.primaryCtaLink || '/krashivantri')}
-                    className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-lg inline-flex items-center gap-2"
-                  >
-                    {sec.primaryCtaLabel || 'Compare Models'} <ArrowRight className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => navigate(sec.secondaryCtaLink || '/shop/category/agri-drone-components')}
-                    className="px-5 py-2.5 border border-slate-600 hover:border-blue-400 text-slate-100 text-sm font-semibold rounded-lg"
-                  >
-                    {sec.secondaryCtaLabel || 'Shop Agri-Drone Parts'}
-                  </button>
-                </div>
               </div>
-              <div className="lg:col-span-6 min-h-[280px] bg-slate-900">
-                <img
-                  src={sec.imageUrl || DRONE_IMG}
-                  alt="KRASHIVANTRI Agricultural and FPV Drone Systems"
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover"
-                />
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => navigate('/krashivantri')}
+                  className="px-4 py-2 bg-[#0B1B3B] hover:bg-[#132954] text-white text-xs font-semibold rounded-lg inline-flex items-center gap-1.5"
+                >
+                  Compare Our Drones <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => navigate('/shop/category/agricultural-drones')}
+                  className="px-4 py-2 border border-slate-300 hover:border-blue-600 text-slate-800 text-xs font-semibold rounded-lg"
+                >
+                  Shop Drone Catalog
+                </button>
               </div>
             </div>
+
+            {/* Flagship KRASHIVANTRI Drone Platforms */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {droneModels.map((m, idx) => (
+                <div
+                  key={m.id}
+                  className="rounded-2xl border border-slate-200 bg-[#0B1B3B] text-white overflow-hidden grid grid-cols-1 sm:grid-cols-12"
+                >
+                  <div className="sm:col-span-5 min-h-[210px] bg-slate-900">
+                    <img
+                      src={m.imageUrl || (idx === 0 ? DRONE_IMG : HERO_IMG)}
+                      alt={m.name}
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="sm:col-span-7 p-6 flex flex-col justify-between space-y-4">
+                    <div className="space-y-2">
+                      <div className="text-[11px] font-mono font-semibold text-blue-300 uppercase">
+                        KRASHIVANTRI Agricultural Drone
+                      </div>
+                      <h3 className="font-display text-2xl font-bold text-white">{m.name}</h3>
+                      <div className="text-xs font-semibold text-sky-200">{m.tagline}</div>
+                      {m.summary && <p className="text-xs text-slate-300 leading-relaxed line-clamp-3">{m.summary}</p>}
+                    </div>
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      <button
+                        onClick={() => navigate(`/product/${m.id}`)}
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg inline-flex items-center gap-1.5"
+                      >
+                        View Drone Details <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => navigate('/krashivantri/farmer-portal')}
+                        className="px-4 py-2 border border-slate-600 hover:border-blue-400 text-slate-100 text-xs font-semibold rounded-lg"
+                      >
+                        Book Spraying
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Ready-to-Order Drone Kits & UAV Assemblies */}
+            {allCatalogDrones.length > 0 && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-display text-xl font-bold text-slate-950">
+                    Drone Kits, Airframes &amp; Avionics
+                  </h3>
+                  <button
+                    onClick={() => navigate('/shop/category/custom-drone-development')}
+                    className="text-xs font-semibold text-blue-700 hover:underline inline-flex items-center gap-1"
+                  >
+                    View Custom Drones <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                {renderProductGrid(allCatalogDrones)}
+              </div>
+            )}
           </section>
         );
+      }
 
       case 'services': {
         const dynamicServices = settings.servicesCatalog?.length

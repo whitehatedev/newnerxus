@@ -77,7 +77,7 @@ const AppRouter: React.FC = () => {
       return <CustomCmsPage slug={slug} />;
     }
     if (normalized === '/store/3d-printed-products') return <ShopListingPage scope="3d_printed" />;
-    if (normalized === '/sale') return <ShopListingPage saleOnly />;
+    if (normalized === '/sale') return <ShopListingPage />;
 
     if (normalized === '/b2b') return <B2BPortalPage />;
     if (normalized === '/blogs') return <BlogsListPage />;

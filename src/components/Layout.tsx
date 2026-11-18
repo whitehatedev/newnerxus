@@ -56,19 +56,23 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const customerCareEmail = company?.customerCareEmail || 'info@nexustekfusion.in';
   const socials = company?.socialLinks;
 
-  const navItems = (
+  const rawNavItems =
     settings.navigationMenus?.header && settings.navigationMenus.header.length > 0
       ? settings.navigationMenus.header
       : [
           { id: 'shop', label: 'Shop Store', to: '/shop', visible: true, sortOrder: 1 },
-          { id: 'sale', label: 'Offers', to: '/sale', visible: true, sortOrder: 2 },
-          { id: 'printing', label: '3D Printing', to: '/services/3d-printing', visible: true, sortOrder: 3 },
-          { id: 'krashivantri', label: 'KRASHIVANTRI', to: '/krashivantri', visible: true, sortOrder: 4 },
-          { id: 'services', label: 'Services', to: '/services', visible: true, sortOrder: 5 },
-          { id: 'track', label: 'Track Order', to: '/track-order', visible: true, sortOrder: 6 },
-        ]
-  )
-    .filter((i) => i.visible !== false)
+          { id: 'printing', label: '3D Printing', to: '/services/3d-printing', visible: true, sortOrder: 2 },
+          { id: 'krashivantri', label: 'KRASHIVANTRI', to: '/krashivantri', visible: true, sortOrder: 3 },
+          { id: 'services', label: 'Services', to: '/services', visible: true, sortOrder: 4 },
+          { id: 'track', label: 'Track Order', to: '/track-order', visible: true, sortOrder: 5 },
+        ];
+
+  const navItems = rawNavItems
+    .filter((i) => i.visible !== false && i.id !== 'sale' && i.to !== '/sale')
+    .map((i) => ({
+      ...i,
+      children: (i.children || []).filter((c) => c.id !== 'shop-sale' && c.to !== '/sale'),
+    }))
     .sort((a, b) => a.sortOrder - b.sortOrder);
 
   const go = (to: string) => {
@@ -340,8 +344,8 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                   <div className="text-xs font-semibold text-slate-400">Store & Portals</div>
                   {[
                     ['Online Store', '/shop'],
+                    ['KRASHIVANTRI Drones', '/krashivantri'],
                     ['3D Printed Products', '/store/3d-printed-products'],
-                    ['Offers & Sale', '/sale'],
                     ['Engineering Projects', '/projects'],
                     ['Project Enquiry', '/project-enquiry'],
                     ['B2B / Bulk Orders', '/b2b'],
@@ -684,9 +688,9 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             <ul className="space-y-2 text-slate-400">
               {[
                 ['Engineering Online Store', '/shop'],
+                ['KRASHIVANTRI Drones', '/krashivantri'],
                 ['3D Printed Products', '/store/3d-printed-products'],
                 ['Engineering R&D Projects', '/projects'],
-                ['Offers & Sale', '/sale'],
                 ['B2B & Bulk Orders', '/b2b'],
                 ['Track Order', '/track-order'],
                 ['Engineering Blogs', '/blogs'],
